@@ -1,5 +1,4 @@
-import  { PrismaClient, Prisma } from '@prisma/client'; // Assumindo que você tenha um arquivo de inicialização do Prisma
-const prisma = new PrismaClient ()
+import { getAllPlayers, createPlayer, updatePlayer, deletePlayer } from '@/services/playerService';
 
 // Criar jogador
 export async function POST(req: Request) {
@@ -13,13 +12,11 @@ export async function POST(req: Request) {
       })
     }
 
-    const player = await prisma.player.create({
-      data: { 
-        name,
-        isAvailable,
-        team
-      },
-    })
+    const player = await createPlayer({
+      name,
+      isAvailable,
+      team
+    });
 
     return new Response(JSON.stringify(player), { status: 201 })
   } catch (error) {
@@ -33,32 +30,10 @@ export async function POST(req: Request) {
 // Listar todos os jogadores
 export async function GET() {
   try {
-    const players = await prisma.player.findMany({
-      select: {
-        id: true,
-        name: true,
-        team: true,
-        isAvailable: true,
-        goals: {
-          select: {
-            id: true
-          }
-        },
-        assists: {
-          select: {
-            id: true
-          }
-        }
-      },
-      orderBy: {
-        goals: {
-          _count: 'desc',
-        },
-      },
-    });
+    const players = await getAllPlayers();
 
     // Transformar os resultados para incluir as contagens
-    const playersWithCounts = players.map(player => ({
+    const playersWithCounts = players.map((player: any) => ({
       ...player,
       goalsCount: player.goals.length,
       assistsCount: player.assists.length
@@ -66,6 +41,7 @@ export async function GET() {
 
     return new Response(JSON.stringify(playersWithCounts), { status: 200 })
   } catch (error) {
+    console.log(error)
     return new Response(JSON.stringify({ error: 'Erro ao buscar jogadores.' }), {
       status: 500,
     })
@@ -84,10 +60,7 @@ export async function PUT(req: Request) {
       })
     }
 
-    const updated = await prisma.player.update({
-      where: { id },
-      data: { name },
-    })
+    const updated = await updatePlayer(id, { name });
 
     return new Response(JSON.stringify(updated), { status: 200 })
   } catch (error) {
@@ -109,9 +82,7 @@ export async function DELETE(req: Request) {
       })
     }
 
-    const deleted = await prisma.player.delete({
-      where: { id },
-    })
+    const deleted = await deletePlayer(id);
 
     return new Response(JSON.stringify(deleted), { status: 200 })
   } catch (error) {

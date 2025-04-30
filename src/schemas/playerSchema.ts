@@ -6,7 +6,7 @@ export const playerSchema = z.object({
     .min(3, { message: "Nome deve ter pelo menos 3 caracteres" })  // Mensagem para nome muito curto
     .max(100, { message: "Nome muito longo" }),
   isAvailable: z.boolean().default(false),
-  team: z.string().optional(),
+  team: z.string().nullable(),
   goals: z.array(z.object({
     playerId: z.number(),
     gameId: z.number(),

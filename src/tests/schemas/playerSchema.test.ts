@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { playerSchema } from "@/schemas/playerSchema";
 
 describe("playerSchema", () => {
-  it("deve aceitar um jogador disponível com time", () => {
+  it("should accept an available player with a team", () => {
     const result = playerSchema.safeParse({
       name: "Lucas",
       isAvailable: true,
@@ -11,28 +11,28 @@ describe("playerSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("deve rejeitar jogador com time mas indisponível", () => {
+  it("should reject a player with a team but unavailable", () => {
     const result = playerSchema.safeParse({
       name: "João",
       isAvailable: false,
       team: "vermelho",
     });
 
-    // Verificando se o erro está presente diretamente no teste
+    // Verifying if the error is present directly in the test
     expect(result.success).toBe(false);
     expect(result.error?.errors[0].message).toBe("Jogador precisa estar disponível para ser atribuído a um time");
   });
 
-  it("deve aceitar um jogador sem time", () => {
+  it("should accept a player without a team", () => {
     const result = playerSchema.safeParse({
       name: "Carlos",
       isAvailable: true,
-      team: undefined,  // ou null
+      team: null,  // or null
     });
     expect(result.success).toBe(true);
   });
 
-  it("deve rejeitar jogador sem nome", () => {
+  it("should reject a player without a name", () => {
     const result = playerSchema.safeParse({
       name: undefined,
       isAvailable: true,
@@ -42,26 +42,26 @@ describe("playerSchema", () => {
     expect(result.error?.errors[0].message).toBe("Required");
   });
 
-  it("deve aceitar jogador sem time, mesmo que esteja indisponível", () => {
+  it("should accept a player without a team, even if unavailable", () => {
     const result = playerSchema.safeParse({
       name: "Ana",
       isAvailable: false,
-      team: undefined,
+      team: null,
     });
     expect(result.success).toBe(true);
   });
 
-  it("deve rejeitar jogador com nome muito curto", () => {
+  it("should reject a player with a very short name", () => {
     const result = playerSchema.safeParse({
-      name: "A",  // nome muito curto
+      name: "A",  // very short name
       isAvailable: true,
       team: "azul",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0].message).toBe("Nome deve ter pelo menos 3 caracteres");  // Corrigido para refletir a validação de comprimento
+    expect(result.error?.errors[0].message).toBe("Nome deve ter pelo menos 3 caracteres");  // Corrected to reflect length validation
   });
   
-  it("deve rejeitar jogador com nome muito longo", () => {
+  it("should reject a player with a very long name", () => {
     const result = playerSchema.safeParse({
       name: "Nome muito longo que excede o limite de 100 caracteresdfdsssssssssssdsssssssssssssssssssssssssssssssssssssssssssssssssssss",
       isAvailable: true,
