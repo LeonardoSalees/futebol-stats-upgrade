@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Round {
+  id    Int      @id @default(autoincrement())
+  name  String // Nome ou identificação da rodada, pode ser uma data, número da temporada, etc.
+  date  DateTime @default(now()) // Data e hora em que a rodada foi criada
+  games Game[] // Relacionamento com os jogos da rodada
+}
+
+model Player {
+  id        Int      @id @default(autoincrement())
+  name      String
+  team      String? // Informação opcional de time, se necessário
+  goals     Goal[]
+  assists   Assist[]
+  gameStats Game[] // Relacionamento para acessar todos os jogos em que o jogador participou
+}
+
+model Game {
+  id       Int      @id @default(autoincrement())
+  roundId  Int // Relacionamento com a rodada
+  round    Round    @relation(fields: [roundId], references: [id])
+  date     DateTime @default(now()) // Data e hora do jogo
+  homeTeam String // Time da casa
+  awayTeam String // Time visitante
+  goals    Goal[] // Gols registrados neste jogo
+  assists  Assist[] // Assistências registradas neste jogo
+  players  Player[] // Jogadores participantes do jogo
+  finished Boolean  @default(false)
+}
+
+model Goal {
+  id       Int    @id @default(autoincrement())
+  playerId Int // Jogador que marcou o gol
+  gameId   Int // Jogo em que o gol foi marcado
+  minute   Int // Minuto em que o gol foi marcado
+  player   Player @relation(fields: [playerId], references: [id])
+  game     Game   @relation(fields: [gameId], references: [id])
+}
+
+model Assist {
+  id       Int    @id @default(autoincrement())
+  playerId Int // Jogador que deu a assistência
+  gameId   Int // Jogo em que a assistência foi feita
+  minute   Int // Minuto da assistência
+  player   Player @relation(fields: [playerId], references: [id])
+  game     Game   @relation(fields: [gameId], references: [id])
+}
