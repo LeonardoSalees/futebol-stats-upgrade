@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { RoundWithGames, ApiError } from '../types';
+import { RoundWithGames, ApiError } from '@/types';
 
 export function useRounds() {
   const [rounds, setRounds] = useState<RoundWithGames[] | undefined>(undefined);

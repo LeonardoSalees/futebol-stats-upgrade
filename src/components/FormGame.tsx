@@ -1,6 +1,6 @@
 // components/FormGame.tsx
 import { useState } from 'react';
-import { createGame } from '../utils/api';
+import { createGame } from '@/utils/api';
 
 const FormGame = () => {
   const [homeTeam, setHomeTeam] = useState('');

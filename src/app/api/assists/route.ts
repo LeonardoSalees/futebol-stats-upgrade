@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import  { PrismaClient, Prisma } from '../../../generated/client'; // Assumindo que você tenha um arquivo de inicialização do Prisma
+import  { PrismaClient, Prisma } from '@/@/generated/client'; // Assumindo que você tenha um arquivo de inicialização do Prisma
 const prisma = new PrismaClient ()
 
 // Criar assistência

@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Crown, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "../app/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 
 export default function Header() {

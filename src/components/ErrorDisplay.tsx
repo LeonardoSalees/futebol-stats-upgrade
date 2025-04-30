@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { AlertCircle } from "lucide-react";
-import { ApiError } from "../app/types";
+import { ApiError } from "@/app/types";
 
 interface ErrorDisplayProps {
   error: ApiError;

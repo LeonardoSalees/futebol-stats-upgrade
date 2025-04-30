@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useRounds } from '../hooks/useRounds';
-import { usePlayers } from '../hooks/usePlayers';
-import { RoundWithGames, ApiError, Player } from '../types';
+import { useRounds } from '@/hooks/useRounds';
+import { usePlayers } from '@/hooks/usePlayers';
+import { RoundWithGames, ApiError, Player } from '@/types';
 
 interface AppContextType {
   rounds: RoundWithGames[] | undefined;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "../contexts/AuthContext";
-import { Button } from "../components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import { FaPlus, FaEdit, FaTrash, FaLock } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player } from '@/app/types';
+import { Player } from '@/types';
 
 export function usePlayers() {
   const [players, setPlayers] = useState<Player[] | undefined>(undefined);
