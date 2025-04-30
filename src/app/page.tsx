@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "./components/ui/button";
+import { Button } from "../components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { dateInBrazilDays } from "./utils/date-format";
-import { ErrorDisplay } from "./components/ErrorDisplay";
-import { SkeletonLoader } from "./components/SkeletonLoader";
-import { ROUTES, BUTTON_STYLES, TEXT_STYLES } from "./constants";
+import { dateInBrazilDays } from "../utils/date-format";
+import { ErrorDisplay } from "../components/ErrorDisplay";
+import { SkeletonLoader } from "../components/SkeletonLoader";
+import { ROUTES, BUTTON_STYLES, TEXT_STYLES } from "../constants";
 import { useAppContext } from "./contexts/AppContext";
 import { useAuth } from "./contexts/AuthContext";
 import { FaLock } from "react-icons/fa";

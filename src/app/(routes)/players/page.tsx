@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAppContext } from '@/app/contexts/AppContext';
 import { Player } from '@/app/types';
 import { 
@@ -27,7 +27,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/app/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function PlayersPage() {
   const router = useRouter();

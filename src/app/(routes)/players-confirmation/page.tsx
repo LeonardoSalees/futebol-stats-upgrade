@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, X, Users, RefreshCw } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useToast } from "@/app/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 interface Player {

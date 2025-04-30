@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
-import { Button } from '@/app/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { ArrowLeft, Calendar, Plus, Trophy, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 

@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from "@radix-ui/react-select";
 import { ArrowLeft, CirclePlay, Clock, Flag, UserCircle2, Trophy, Award, Users, X } from "lucide-react";
-import { DialogHeader } from "@/app/components/ui/dialog";
+import { DialogHeader } from "@/components/ui/dialog";
 import axios from "axios";
 import { Game, type Player } from "@prisma/client";
 import toast from "react-hot-toast";

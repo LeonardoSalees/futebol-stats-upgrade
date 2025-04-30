@@ -6,11 +6,11 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { Assist, Game, Goal, Player, Round } from "@prisma/client";
-import { dateInBrazilDaysAndHours, dateInBrazilHours } from "@/app/utils/date-format";
-import { Button } from "@/app/components/ui/button";
+import { dateInBrazilDaysAndHours, dateInBrazilHours } from "@/utils/date-format";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Plus, Trophy, CheckCircle, Clock, Flag, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import { useToast } from "@/app/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/app/contexts/AuthContext";
 import {
   AlertDialog,
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/app/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 
 type GoalWithPlayer = Goal & {
   player: Player

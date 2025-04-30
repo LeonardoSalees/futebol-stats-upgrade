@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { User, Goal, Calendar, Trophy, Target, Award, TrendingUp, BarChart3, Star, Medal, Users } from "lucide-react";
-import { CardSkeleton, SkeletonContainer } from "@/app/components/skeletons";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import { Progress } from "@/app/components/ui/progress";
-import { Badge } from "@/app/components/ui/badge";
+import { CardSkeleton, SkeletonContainer } from "@/components/skeletons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 // Definir os tipos para Player e Game
 type GoalType = {

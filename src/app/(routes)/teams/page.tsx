@@ -7,7 +7,7 @@ import { Player } from "@prisma/client";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaUsers, FaRandom, FaCheck, FaFutbol, FaHandshake } from "react-icons/fa";
-import { ListSkeleton, SkeletonContainer } from "@/app/components/skeletons";
+import { ListSkeleton, SkeletonContainer } from "@/components/skeletons";
 import { useAppContext } from "../contexts/AppContext";
 import {
   DndContext,
