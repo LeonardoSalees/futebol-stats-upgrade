@@ -1,4 +1,4 @@
-import { getAllPlayers, createPlayer, updatePlayer, deletePlayer } from '@/services/playerService';
+import { getAllPlayers, createPlayer, updatePlayer } from '@/services/playerService';
 
 // Criar jogador
 export async function POST(req: Request) {
@@ -20,8 +20,9 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify(player), { status: 201 })
   } catch (error) {
-    console.log(error)
-    return new Response(JSON.stringify({ error: 'Erro ao criar o jogador.' }), {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao criar o jogador.';
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     })
   }
@@ -41,8 +42,9 @@ export async function GET() {
 
     return new Response(JSON.stringify(playersWithCounts), { status: 200 })
   } catch (error) {
-    console.log(error)
-    return new Response(JSON.stringify({ error: 'Erro ao buscar jogadores.' }), {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao buscar jogadores.';
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     })
   }
@@ -64,29 +66,9 @@ export async function PUT(req: Request) {
 
     return new Response(JSON.stringify(updated), { status: 200 })
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Erro ao atualizar jogador.' }), {
-      status: 500,
-    })
-  }
-}
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar jogador.';
 
-// Deletar jogador
-export async function DELETE(req: Request) {
-  try {
-    const body = await req.json()
-    const { id } = body
-
-    if (!id) {
-      return new Response(JSON.stringify({ error: 'ID é obrigatório.' }), {
-        status: 400,
-      })
-    }
-
-    const deleted = await deletePlayer(id);
-
-    return new Response(JSON.stringify(deleted), { status: 200 })
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'Erro ao excluir jogador.' }), {
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     })
   }

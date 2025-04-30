@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { ArrowLeft, Calendar, Trophy, Users, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -181,7 +181,7 @@ export default function NewGamePage() {
           </p>
           
           <Button
-            onClick={() => router.push(`/rounds/${id}/draw-teams`)}
+            onClick={() => router.push(`/teams`)}
             className="w-full bg-white text-yellow-800 hover:bg-gray-100"
           >
             Ir para Sorteio de Times

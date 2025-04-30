@@ -6,7 +6,9 @@ export async function GET() {
 
     return new Response(JSON.stringify(players), { status: 200 })
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Erro ao buscar jogadores.' }), {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao buscar jogadores disponíveis.';
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     })
   }

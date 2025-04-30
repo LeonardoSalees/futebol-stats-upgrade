@@ -14,9 +14,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       name,
     });
 
-    return NextResponse.json(updatedPlayer);
+    return new Response(JSON.stringify(updatedPlayer), { status: 201 })
   } catch (error) {
-    console.error(error);
-    return new NextResponse('Erro ao atualizar jogador', { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar jogador.';
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+    })
   }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { createPlayer, getAllPlayers, getPlayerById, updatePlayer, deletePlayer, getAvailablePlayers } from '@/services/playerService';
+import { createPlayer, getAllPlayers, getPlayerById, updatePlayer, getAvailablePlayers } from '@/services/playerService';
 import prisma from '@/lib/prisma';
 
 vi.mock('@/lib/prisma', () => {
@@ -65,13 +65,6 @@ describe('Player Service', () => {
       include: { assists: true, goals: true },
     });
     expect(result).toEqual(updatedPlayer);
-  });
-
-  it('should delete a player', async () => {
-    (prisma.player.delete as jest.Mock).mockResolvedValue({});
-
-    await deletePlayer(1);
-    expect(prisma.player.delete).toHaveBeenCalledWith({ where: { id: 1 } });
   });
 });
 

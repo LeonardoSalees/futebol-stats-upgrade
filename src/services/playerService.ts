@@ -51,13 +51,6 @@ export async function getAllPlayers() {
   });
 }
 
-// Deleta um jogador por ID
-export async function deletePlayer(id: number) {
-  return prisma.player.delete({
-    where: { id },
-  });
-}
-
 export async function getAvailablePlayers() {
   try {
     const players = await prisma.player.findMany({
