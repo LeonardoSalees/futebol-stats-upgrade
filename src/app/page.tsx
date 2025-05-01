@@ -11,6 +11,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { FaLock } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { RoundWithGames } from "@/types";
 
 interface Game {
   id: string;
@@ -23,10 +24,9 @@ interface Game {
 
 interface Round {
   id: string;
-  name: string;
   date: string;
   finished: boolean;
-  games: Game[];
+  games: Game[] | null; // Verifica se a lista de jogos é null ou não
 }
 
 // Componente de navegação principal com cards
@@ -137,9 +137,13 @@ const MainNavigation = () => {
 };
 
 // Componente de rodada ativa com design moderno
-const ActiveRound = ({ round }: { round: Round }) => {
+const ActiveRound = ({ round }: { round: RoundWithGames | undefined }) => {
   const router = useRouter();
   
+  if (!round || !round.games) {
+    return null; // Caso o round ou os jogos sejam nulos ou indefinidos
+  }
+
   const handleClick = () => {
     router.push(`/rounds/${round.id}`);
   };
@@ -174,15 +178,15 @@ const ActiveRound = ({ round }: { round: Round }) => {
         <div className="bg-gray-800 rounded-lg p-3 mb-3">
           <div className="flex justify-between items-center text-base">
             <div className="flex-1 text-right">
-              <span className="font-bold text-white text-sm">{round.games[0].homeTeam}</span>
+              <span className="font-bold text-white text-sm">{round.games[0]?.homeTeam}</span>
             </div>
             <div className="mx-3 flex items-center">
-              <span className="text-xl font-bold text-yellow-400">{round.games[0].homeScore}</span>
+              <span className="text-xl font-bold text-yellow-400">{round.games[0]?.homeScore}</span>
               <span className="mx-1 text-gray-400">x</span>
-              <span className="text-xl font-bold text-yellow-400">{round.games[0].awayScore}</span>
+              <span className="text-xl font-bold text-yellow-400">{round.games[0]?.awayScore}</span>
             </div>
             <div className="flex-1 text-left">
-              <span className="font-bold text-white text-sm">{round.games[0].awayTeam}</span>
+              <span className="font-bold text-white text-sm">{round.games[0]?.awayTeam}</span>
             </div>
           </div>
         </div>
@@ -192,27 +196,31 @@ const ActiveRound = ({ round }: { round: Round }) => {
 };
 
 // Componente de histórico de partidas
-const MatchHistory = ({ rounds }: { rounds: Round[] | undefined }) => {
+const MatchHistory = ({ rounds }: { rounds: RoundWithGames[] | undefined }) => {
   const router = useRouter();
+
+  if (!rounds || rounds.length === 0) {
+    return null; // Caso os rounds sejam nulos ou vazios
+  }
 
   return (
     <section className="max-w-4xl mx-auto space-y-4">
       <h2 className="text-xl font-bold text-white text-center">Histórico de Partidas</h2>
       <div className="grid gap-4">
-        {rounds?.map((round) => (
+        {rounds.map((round) => (
           <div 
             key={round.id} 
             className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors"
             onClick={() => router.push(`/rounds/${round.id}`)}
           >
             <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-300">{round.name}</span>
+              <span className="text-gray-300">{round.id}</span>
               <span className="text-gray-400 text-sm">
                 {dateInBrazilDays(new Date(round.date))}
               </span>
             </div>
             <div className="space-y-2">
-              {round.games.map((game) => (
+              {round.games?.map((game) => (
                 <div key={game.id} className="flex justify-between items-center text-sm">
                   <span className="text-white">{game.homeTeam}</span>
                   <span className="text-yellow-400 font-bold">
