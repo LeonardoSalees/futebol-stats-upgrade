@@ -1,20 +1,22 @@
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma";  
+import { drawSchema } from "@/schemas/drawSchema";
 
-export async function createTeamsForDraw(roundId: number, teams: { name: string; players: number[] }[]) {
+export async function createTeamsForDraw(data: {roundId: number, teams: { name: string; players: number[] }[]}) {
   try {
+    const parsedData = drawSchema.parse(data);
     const existingTeams = await prisma.team.findMany({
-      where: { roundId },
+      where: { roundId: parsedData.roundId },
     });
   
     if (existingTeams.length > 0) {
       throw new Error('Times já foram sorteados para esta rodada.');
     }
     const createdTeams = await Promise.all(
-      teams.map(async (team) => {
+      parsedData.teams.map(async (team) => {
         const newTeam = await prisma.team.create({
           data: {
             name: team.name,
-            roundId,
+            roundId: parsedData.roundId,
             players: {
               create: team.players.map((playerId) => ({
                 player: { connect: { id: playerId } },

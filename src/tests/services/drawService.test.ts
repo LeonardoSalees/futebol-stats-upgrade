@@ -1,6 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createTeamsForDraw } from '@/services/drawService';
 import prisma from '@/lib/prisma';
+beforeEach(() => {
+  // Limpar todos os mocks antes de cada teste
+  vi.clearAllMocks();
+});
 
 vi.mock('@/lib/prisma', () => {
   return {
@@ -27,7 +31,7 @@ describe('createTeamsForDraw', () => {
     prisma.team.create.mockResolvedValueOnce({ id: 1, name: 'Team A' });
     prisma.team.create.mockResolvedValueOnce({ id: 2, name: 'Team B' });
 
-    const result = await createTeamsForDraw(1, mockTeams);
+    const result = await createTeamsForDraw({roundId: 1, teams: mockTeams});
 
     expect(result).toHaveLength(2);
     expect(result[0]).toHaveProperty('name', 'Team A');
@@ -45,6 +49,6 @@ describe('createTeamsForDraw', () => {
     // Simular falha na criação de times
     prisma.team.create.mockRejectedValueOnce(new Error('Database error'));
 
-    await expect(createTeamsForDraw(1, mockTeams)).rejects.toThrow('Erro ao criar os times.');
+    await expect(createTeamsForDraw({roundId: 1, teams: mockTeams})).rejects.toThrow('Erro ao criar os times.');
   });
 });

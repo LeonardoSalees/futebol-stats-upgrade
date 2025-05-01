@@ -1,6 +1,11 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { createPlayer, getAllPlayers, getPlayerById, updatePlayer, getAvailablePlayers } from '@/services/playerService';
 import prisma from '@/lib/prisma';
+
+beforeEach(() => {
+  // Limpar todos os mocks antes de cada teste
+  vi.clearAllMocks();
+});
 
 vi.mock('@/lib/prisma', () => {
   return {

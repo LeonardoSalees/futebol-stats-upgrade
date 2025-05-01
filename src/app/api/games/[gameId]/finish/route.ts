@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { finalizeGame } from "@/services/gameService";
 
 export async function POST(
   request: Request,
@@ -15,68 +14,34 @@ export async function POST(
   }
 
   try {
-    // Verificar se o jogo existe e se já foi finalizado
-    const existingGame = await prisma.game.findUnique({
-      where: { id: parseInt(gameId, 10) },
-      select: { finished: true, roundId: true }
-    });
-
-    if (!existingGame) {
-      return new Response(
-        JSON.stringify({ error: "Jogo não encontrado" }),
-        { status: 404 }
-      );
-    }
-
-    if (existingGame.finished) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Este jogo já foi finalizado",
-          roundId: existingGame.roundId
-        }),
-        { status: 403 }
-      );
-    }
-
-    // Verificar se a rodada está finalizada
-    const round = await prisma.round.findUnique({
-      where: { id: existingGame.roundId },
-      select: { finished: true }
-    });
-
-    if (!round) {
-      return new Response(
-        JSON.stringify({ error: "Rodada não encontrada" }),
-        { status: 404 }
-      );
-    }
-
-    if (round.finished) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Não é possível finalizar um jogo em uma rodada finalizada",
-          roundId: existingGame.roundId
-        }),
-        { status: 403 }
-      );
-    }
-
-    const game = await prisma.game.update({
-      where: { id: parseInt(gameId, 10) },
-      data: {
-        finished: true,
-      },
-      select:{
-        roundId: true
-      }
-    });
+    const game = await finalizeGame(gameId);
 
     return new Response(JSON.stringify(game), { status: 200 });
-  } catch (error) {
-    console.error("Erro ao finalizar o jogo:", error);
+  } catch (error: any) {
+    let status = 500;
+    let errorMessage = "Erro ao finalizar o jogo";
+
+    // Personalizando o erro baseado no tipo
+    if (error.message === "ID do jogo inválido") {
+      status = 400;
+      errorMessage = error.message;
+    } else if (error.message === "Jogo não encontrado") {
+      status = 404;
+      errorMessage = error.message;
+    } else if (error.message === "Este jogo já foi finalizado") {
+      status = 403;
+      errorMessage = error.message;
+    } else if (error.message === "Rodada não encontrada") {
+      status = 404;
+      errorMessage = error.message;
+    } else if (error.message === "Não é possível finalizar um jogo em uma rodada finalizada") {
+      status = 403;
+      errorMessage = error.message;
+    }
+
     return new Response(
-      JSON.stringify({ error: "Erro ao finalizar o jogo" }),
-      { status: 500 }
+      JSON.stringify({ error: errorMessage }),
+      { status }
     );
   }
 }
