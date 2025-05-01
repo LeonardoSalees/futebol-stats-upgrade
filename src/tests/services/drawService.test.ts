@@ -25,11 +25,11 @@ describe('createTeamsForDraw', () => {
     ];
 
     // Simular que não há times existentes
-    prisma.team.findMany.mockResolvedValueOnce([]);
+    (prisma.team.findMany as any).mockResolvedValueOnce([]);
 
     // Simular criação bem-sucedida de times
-    prisma.team.create.mockResolvedValueOnce({ id: 1, name: 'Team A' });
-    prisma.team.create.mockResolvedValueOnce({ id: 2, name: 'Team B' });
+    (prisma.team.create as any).mockResolvedValueOnce({ id: 1, name: 'Team A' });
+    (prisma.team.create as any).mockResolvedValueOnce({ id: 2, name: 'Team B' });
 
     const result = await createTeamsForDraw({roundId: 1, teams: mockTeams});
 
@@ -44,10 +44,10 @@ describe('createTeamsForDraw', () => {
     ];
 
     // Simular que não há times existentes
-    prisma.team.findMany.mockResolvedValueOnce([]);
+    (prisma.team.findMany as any).mockResolvedValueOnce([]);
 
     // Simular falha na criação de times
-    prisma.team.create.mockRejectedValueOnce(new Error('Database error'));
+    (prisma.team.create as any).mockRejectedValueOnce(new Error('Database error'));
 
     await expect(createTeamsForDraw({roundId: 1, teams: mockTeams})).rejects.toThrow('Erro ao criar os times.');
   });

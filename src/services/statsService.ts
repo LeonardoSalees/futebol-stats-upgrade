@@ -31,7 +31,12 @@ export async function getPlayerRanking() {
   });
 
   // Ordenar por total de gols + assistências (pode ser ajustado conforme a lógica de ranking)
-  ranking.sort((a, b) => b.total - a.total);
+  ranking.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    if (b.goals !== a.goals) return b.goals - a.goals;
+    if (b.assists !== a.assists) return b.assists - a.assists;
+    return a.name.localeCompare(b.name); // Como último critério, ordena por nome
+  });
 
   return ranking;
 }
