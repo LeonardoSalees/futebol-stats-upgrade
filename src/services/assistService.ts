@@ -1,9 +1,11 @@
 import prisma from '@/lib/prisma';
 import { assistSchema } from '@/schemas/assistSchema';
+import { ZodError } from 'zod';
 
 // Cria uma nova assistência
 export async function createAssist(data: { playerId: number; gameId: number; minute: number; team: string }) {
-  // Valida os dados de entrada
+  try {
+    // Valida os dados de entrada
   const parsedData = assistSchema.parse(data);
 
   // Verifica se já existe um gol no mesmo minuto
@@ -34,13 +36,14 @@ export async function createAssist(data: { playerId: number; gameId: number; min
     throw new Error('O jogador já deu assistência para o outro time neste jogo.');
   }
 
-  
-
   return prisma.assist.create({
     data: parsedData,
   });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao criar assistência';
+    throw new Error(errorMessage);
+  }
 }
-
 // Atualiza uma assistência existente
 export async function updateAssist(id: number, data: Partial<{ playerId: number; gameId: number; minute: number; team: string }>) {
   // Valida os dados de entrada

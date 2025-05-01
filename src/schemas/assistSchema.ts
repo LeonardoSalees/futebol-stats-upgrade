@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const assistSchema = z.object({
+  id: z.number().int().positive().optional(),
   playerId: z.number().int().positive({
     message: "playerId deve ser um número inteiro positivo",
   }),

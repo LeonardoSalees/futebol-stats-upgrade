@@ -41,9 +41,28 @@ describe('Assist Service', () => {
 
   it('should not allow an assist for both teams in the same game', async () => {
     const assistData = { playerId: 1, gameId: 1, minute: 45, team: 'Team A' };
-    (prisma.assist.findFirst as jest.Mock).mockResolvedValue({ playerId: 1, gameId: 1, team: 'Team B' });
-
-    await expect(createAssist(assistData)).rejects.toThrow('O jogador já deu assistência para o outro time neste jogo.');
+  
+    // Simula que o jogador já deu assistência para o outro time (Team B)
+    (prisma.assist.findFirst as jest.Mock).mockImplementation(async (args) => {
+      console.log('Mock chamado com args:', args);
+      if (
+        args.where.playerId === 1 &&
+        args.where.gameId === 1 &&
+        args.where.team?.not === 'Team A'
+      ) {
+        return {
+          playerId: 1,
+          gameId: 1,
+          minute: 30,
+          team: 'Team B',
+        };
+      }
+      return null;
+    });
+  
+    await expect(createAssist(assistData)).rejects.toThrow(
+      'O jogador já deu assistência para o outro time neste jogo.'
+    );
   });
 
   it('should not allow a player to assist their own goal', async () => {
