@@ -10,7 +10,6 @@ datasource db {
 
 model Round {
   id        Int      @id @default(autoincrement())
-  name      String   // Nome ou identificação da rodada, pode ser uma data, número da temporada, etc.
   date      DateTime @default(now()) // Data e hora em que a rodada foi criada
   games     Game[]   // Relacionamento com os jogos da rodada
   teams     Team[]

@@ -29,10 +29,10 @@ describe('createGame', () => {
     const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
 
     // Mockando o comportamento da rodada
-    prisma.round.findUnique.mockResolvedValue({ finished: false });
+    (prisma.round.findUnique as any).mockResolvedValue({ finished: false });
 
     // Mockando o comportamento de criação do jogo
-    prisma.game.create.mockResolvedValue({
+    (prisma.game.create as any).mockResolvedValue({
       id: 1,
       roundId,
       homeTeam: 'Team A',
@@ -54,7 +54,7 @@ describe('createGame', () => {
     const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
 
     // Mockando o comportamento da rodada
-    prisma.round.findUnique.mockResolvedValue({ finished: true });
+    (prisma.round.findUnique as any).mockResolvedValue({ finished: true });
 
     await expect(createGame(gameData)).rejects.toThrow('Não é possível criar um jogo para uma rodada finalizada.');
   });
@@ -64,7 +64,7 @@ describe('createGame', () => {
     const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
 
     // Mockando a rodada não encontrada
-    prisma.round.findUnique.mockResolvedValue(null);
+    (prisma.round.findUnique as any).mockResolvedValue(null);
 
     await expect(createGame(gameData)).rejects.toThrow('Rodada não encontrada.');
   });
@@ -74,7 +74,7 @@ describe('createGame', () => {
 describe('getAllGames', () => {
   it('should return all games', async () => {
     // Mockando o comportamento do Prisma
-    prisma.game.findMany.mockResolvedValue([
+    (prisma.game.findMany as any).mockResolvedValue([
       { id: 1, homeTeam: 'Team A', awayTeam: 'Team B' },
       { id: 2, homeTeam: 'Team C', awayTeam: 'Team D' },
     ]);
@@ -93,7 +93,7 @@ describe('updateGame', () => {
     const updatedData = { id: 1, roundId: 2, date: '2025-04-01' };
 
     // Mockando o comportamento do Prisma
-    prisma.game.update.mockResolvedValue({
+    (prisma.game.update as any).mockResolvedValue({
       id: 1,
       roundId: 2,
       date: new Date('2025-04-01'),
@@ -115,7 +115,7 @@ describe('getGameById', () => {
     const gameId = 1;
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue({
+    (prisma.game.findUnique as any).mockResolvedValue({
       id: 1,
       homeTeam: 'Team A',
       awayTeam: 'Team B',
@@ -146,7 +146,7 @@ describe('getGameById', () => {
     const gameId = 999;
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue(null);
+    (prisma.game.findUnique as any).mockResolvedValue(null);
 
     await expect(getGameById(gameId)).rejects.toThrow('Jogo não encontrado.');
   });
@@ -159,8 +159,8 @@ describe('updateGameById', () => {
     const data = { started: true, time: 10 };
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue({ finished: false });
-    prisma.game.update.mockResolvedValue({
+    (prisma.game.findUnique as any) .mockResolvedValue({ finished: false });
+    (prisma.game.update as any).mockResolvedValue({
       id: gameId,
       started: true,
       time: 10,
@@ -180,7 +180,7 @@ describe('updateGameById', () => {
     const data = { started: true, time: 10 };
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue({ finished: true });
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: true });
 
     await expect(updateGameById(gameId, data)).rejects.toThrow(
       'Não é possível atualizar um jogo que já foi finalizado.'
@@ -196,8 +196,8 @@ describe('updateGameScore', () => {
     const awayScore = 3;
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue({ finished: false });
-    prisma.game.update.mockResolvedValue({
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: false });
+    (prisma.game.update as any).mockResolvedValue({
       id: 1,
       homeScore,
       awayScore,
@@ -218,7 +218,7 @@ describe('updateGameScore', () => {
     const awayScore = 3;
 
     // Mockando o comportamento do Prisma
-    prisma.game.findUnique.mockResolvedValue({ finished: true });
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: true });
 
     await expect(updateGameScore(gameId, homeScore, awayScore)).rejects.toThrow(
       'Não é possível atualizar o placar de um jogo que já foi finalizado.'
@@ -247,7 +247,7 @@ describe('finalizeGame', () => {
   });
   
   it('should throw error if game not found', async () => {
-    prisma.game.findUnique.mockResolvedValue(null);
+    (prisma.game.findUnique as any).mockResolvedValue(null);
   
     try {
       await finalizeGame('1');
@@ -257,7 +257,7 @@ describe('finalizeGame', () => {
   });
   
   it('should throw error if game is already finished', async () => {
-    prisma.game.findUnique.mockResolvedValue({ finished: true, roundId: 1 });
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: true, roundId: 1 });
   
     try {
       await finalizeGame('1');
@@ -267,8 +267,8 @@ describe('finalizeGame', () => {
   });
   
   it('should throw error if round not found', async () => {
-    prisma.game.findUnique.mockResolvedValue({ finished: false, roundId: 1 });
-    prisma.round.findUnique.mockResolvedValue(null);
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
+    (prisma.round.findUnique as any).mockResolvedValue(null);
   
     try {
       await finalizeGame('1');
@@ -278,8 +278,8 @@ describe('finalizeGame', () => {
   });
   
   it('should throw error if round is finished', async () => {
-    prisma.game.findUnique.mockResolvedValue({ finished: false, roundId: 1 });
-    prisma.round.findUnique.mockResolvedValue({ finished: true });
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
+    (prisma.round.findUnique as any).mockResolvedValue({ finished: true });
   
     try {
       await finalizeGame('1');
@@ -289,9 +289,9 @@ describe('finalizeGame', () => {
   });
   
   it('should successfully finalize a game', async () => {
-    prisma.game.findUnique.mockResolvedValue({ finished: false, roundId: 1 });
-    prisma.round.findUnique.mockResolvedValue({ finished: false });
-    prisma.game.update.mockResolvedValue({ roundId: 1 });
+    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
+    (prisma.round.findUnique as any).mockResolvedValue({ finished: false });
+    (prisma.game.update as any).mockResolvedValue({ roundId: 1 });
   
     const result = await finalizeGame('1');
     expect(result).toEqual({ roundId: 1 });
