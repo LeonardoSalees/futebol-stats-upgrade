@@ -1,14 +1,26 @@
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { GoalSchema } from "@/schemas/goalSchema";
 import { z } from "zod";
+import { getCurrentTenantId } from '@/lib/tenantContext';
 
-export async function listGoals() {
+export async function listGoals(tenantId?: string) {
   try {
+    // Obter o tenant atual se não for fornecido
+    const currentTenantId = tenantId || getCurrentTenantId();
+    
+    if (!currentTenantId) {
+      throw new Error("TenantId não encontrado");
+    }
+    
     const goals = await prisma.goal.findMany({
       include: {
         player: true,
         game: true,
+        assistPlayer: true,
       },
+      where: {
+        tenantId: currentTenantId
+      }
     });
     return goals;
   } catch (error) {
@@ -39,16 +51,47 @@ export async function createGoal(goalData: z.infer<typeof GoalSchema>) {
     if (!playerExists) {
       throw new Error('Jogador não encontrado.');
     }
+
+    // Verifica se o jogador da assistência existe, se fornecido
+    if (parsedData.assistPlayerId) {
+      const assistPlayerExists = await prisma.player.findUnique({
+        where: { id: parsedData.assistPlayerId },
+      });
+      if (!assistPlayerExists) {
+        throw new Error('Jogador da assistência não encontrado.');
+      }
+
+      // Verifica se o jogador está tentando dar assistência para seu próprio gol
+      if (parsedData.assistPlayerId === parsedData.playerId) {
+        throw new Error('Um jogador não pode dar assistência para seu próprio gol.');
+      }
+    }
+    if (!goalData.tenantId) {
+      throw new Error('O tenantId é obrigatório.');
+    }
     const goal = await prisma.goal.create({
       data: { 
         playerId: goalData.playerId,
         gameId: goalData.gameId,
         team: goalData.team,
         minute: goalData.minute,
-      }
+        assistPlayerId: goalData.assistPlayerId || null,
+        tenantId: goalData.tenantId,
+      },
+      include: {
+        player: true,
+        game: true,
+        assistPlayer: true,
+      },
     });
     return goal;
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Dados inválidos: ${error.errors[0].message}`);
+    }
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Erro ao criar gol.');
   }
 }

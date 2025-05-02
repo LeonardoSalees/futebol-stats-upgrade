@@ -1,9 +1,9 @@
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { assistSchema } from '@/schemas/assistSchema';
 import { ZodError } from 'zod';
 
 // Cria uma nova assistência
-export async function createAssist(data: { playerId: number; gameId: number; minute: number; team: string }) {
+export async function createAssist(data: { playerId: number; gameId: number; minute: number; team: string; tenantId: string }) {
   try {
     // Valida os dados de entrada
   const parsedData = assistSchema.parse(data);
@@ -35,9 +35,18 @@ export async function createAssist(data: { playerId: number; gameId: number; min
   if (existingAssist) {
     throw new Error('O jogador já deu assistência para o outro time neste jogo.');
   }
+  if (!parsedData.tenantId) {
+    throw new Error('O tenantId é obrigatório.');
+  }
 
   return prisma.assist.create({
-    data: parsedData,
+    data: {
+      playerId: parsedData.playerId,
+      gameId: parsedData.gameId,
+      minute: parsedData.minute,
+      team: parsedData.team,
+      tenantId: parsedData.tenantId,  
+    }
   });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro ao criar assistência';

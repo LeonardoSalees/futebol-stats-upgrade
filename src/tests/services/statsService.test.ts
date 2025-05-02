@@ -5,10 +5,11 @@ import {
   getRoundStatistics,
   getAllStatistics,
 } from '@/services/statsService';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
+// Correctly mock the prisma module
 vi.mock('@/lib/prisma', () => ({
-  default: {
+  prisma: {
     player: {
       findMany: vi.fn(),
     },

@@ -18,4 +18,7 @@ export const gameSchema = z.object({
   assistIds: z.array(z.number()).optional(),    // ID das assistências
   playerIds: z.array(z.number()).optional(),    // Jogadores que participaram
   gameStatPlayerIds: z.array(z.number()).optional(), // Jogadores com estatísticas
+  tenantId: z.string().min(1, {
+    message: "O tenantId é obrigatório",
+  }).optional(),
 });

@@ -8,101 +8,149 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Round {
-  id        Int      @id @default(autoincrement())
-  date      DateTime @default(now()) // Data e hora em que a rodada foi criada
-  games     Game[]   // Relacionamento com os jogos da rodada
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  subdomain String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assists   Assist[]
+  games     Game[]
+  goals     Goal[]
+  players   Player[]
+  rounds    Round[]
   teams     Team[]
-  finished  Boolean  @default(false) // Indica se a rodada foi encerrada
+  users     User[]
+}
+
+model Round {
+  id       Int      @id @default(autoincrement())
+  date     DateTime @default(now())
+  finished Boolean  @default(false)
+  tenantId String
+  games    Game[]
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  teams    Team[]
+
+  @@unique([id, tenantId])
 }
 
 model Player {
-  id           Int             @id @default(autoincrement())
-  name         String @unique
-  isAvailable Boolean @default(false)
-  team     String?         // opcional
-  goals        Goal[]
-  assists      Assist[]
-  gameStats    Game[]          // relaciona com os jogos que o jogador participou
-  gamePlayers  GamePlayer[]    // adicione esta linha para relação inversa
-  playerTeams  PlayerOnTeam[]  // jogadores no sorteio
+  id          Int            @id @default(autoincrement())
+  name        String
+  isAvailable Boolean        @default(false)
+  team        String?
+  tenantId    String
+  assists     Assist[]
+  gamePlayers GamePlayer[]
+  goalAssists Goal[]         @relation("GoalAssists")
+  goals       Goal[]
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  playerTeams PlayerOnTeam[]
+  gameStats   Game[]         @relation("GameToPlayer")
+
+  @@unique([name, tenantId])
+  @@unique([id, tenantId])
 }
 
 model Game {
-  id          Int        @id @default(autoincrement())
-  roundId     Int
-  round       Round      @relation(fields: [roundId], references: [id])
-  date        DateTime   @default(now())
-  homeTeam    String
-  awayTeam    String
-  homeScore   Int        @default(0) // Placar do time da casa
-  awayScore   Int        @default(0) // Placar do time visitante
-  goals       Goal[]
-  assists     Assist[]
-  players     GamePlayer[] // jogadores no jogo
-  gameStats   Player[]    // adicione esta linha para relação inversa
-  finished    Boolean     @default(false)
-  started     Boolean     @default(false)
-  startedAt   DateTime?   // momento do início do jogo
-  time        Int        @default(0) // tempo do jogo em segundos
+  id        Int          @id @default(autoincrement())
+  roundId   Int
+  date      DateTime     @default(now())
+  homeTeam  String
+  awayTeam  String
+  homeScore Int          @default(0)
+  awayScore Int          @default(0)
+  finished  Boolean      @default(false)
+  started   Boolean      @default(false)
+  startedAt DateTime?
+  time      Int          @default(0)
+  tenantId  String
+  assists   Assist[]
+  round     Round        @relation(fields: [roundId, tenantId], references: [id, tenantId])
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  players   GamePlayer[]
+  goals     Goal[]
+  gameStats Player[]     @relation("GameToPlayer")
+
+  @@unique([id, tenantId])
 }
 
 model GamePlayer {
-  id         Int     @id @default(autoincrement())
-  gameId     Int
-  playerId   Int
-  team  String  // cor do colete naquele jogo
+  id       Int    @id @default(autoincrement())
+  gameId   Int
+  playerId Int
+  team     String
+  tenantId String
+  game     Game   @relation(fields: [gameId, tenantId], references: [id, tenantId])
+  player   Player @relation(fields: [playerId, tenantId], references: [id, tenantId])
 
-  game       Game    @relation(fields: [gameId], references: [id])
-  player     Player  @relation(fields: [playerId], references: [id])
+  @@unique([id, tenantId])
 }
 
-
 model Goal {
-  id        Int      @id @default(autoincrement())
-  playerId  Int      // Jogador que marcou o gol
-  gameId    Int      // Jogo em que o gol foi marcado
-  team String   // o time pelo qual o jogador marcou
-  minute    Int      // Minuto em que o gol foi marcado
+  id             Int     @id @default(autoincrement())
+  playerId       Int
+  gameId         Int
+  team           String
+  minute         Int
+  assistPlayerId Int?
+  tenantId       String
+  assistPlayer   Player? @relation("GoalAssists", fields: [assistPlayerId, tenantId], references: [id, tenantId])
+  game           Game    @relation(fields: [gameId, tenantId], references: [id, tenantId])
+  player         Player  @relation(fields: [playerId, tenantId], references: [id, tenantId])
+  tenant         Tenant  @relation(fields: [tenantId], references: [id])
 
-  player    Player   @relation(fields: [playerId], references: [id])
-  game      Game     @relation(fields: [gameId], references: [id])
+  @@unique([id, tenantId])
 }
 
 model Assist {
-  id        Int      @id @default(autoincrement())
-  playerId  Int      // Jogador que deu a assistência
-  gameId    Int      // Jogo em que a assistência foi feita
-  minute    Int      // Minuto da assistência
-  team String   // o time pelo qual o jogador marcou
+  id       Int    @id @default(autoincrement())
+  playerId Int
+  gameId   Int
+  minute   Int
+  team     String
+  tenantId String
+  game     Game   @relation(fields: [gameId, tenantId], references: [id, tenantId])
+  player   Player @relation(fields: [playerId, tenantId], references: [id, tenantId])
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  player    Player   @relation(fields: [playerId], references: [id])
-  game      Game     @relation(fields: [gameId], references: [id])
+  @@unique([id, tenantId])
 }
 
 model Team {
-  id       Int             @id @default(autoincrement())
+  id       Int            @id @default(autoincrement())
   roundId  Int
-  name     String          // "verde", "vermelho", etc.
-  round    Round           @relation(fields: [roundId], references: [id])
+  name     String
+  tenantId String
   players  PlayerOnTeam[]
+  round    Round          @relation(fields: [roundId, tenantId], references: [id, tenantId])
+  tenant   Tenant         @relation(fields: [tenantId], references: [id])
+
+  @@unique([id, tenantId])
 }
 
 model PlayerOnTeam {
-  id        Int     @id @default(autoincrement())
-  playerId  Int
-  teamId    Int
+  id       Int    @id @default(autoincrement())
+  playerId Int
+  teamId   Int
+  tenantId String
+  player   Player @relation(fields: [playerId, tenantId], references: [id, tenantId])
+  team     Team   @relation(fields: [teamId, tenantId], references: [id, tenantId])
 
-  player    Player  @relation(fields: [playerId], references: [id])
-  team      Team    @relation(fields: [teamId], references: [id])
+  @@unique([id, tenantId])
 }
 
 model User {
   id        String   @id @default(uuid())
   name      String
-  email     String   @unique
+  email     String
   password  String
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([email, tenantId])
 }

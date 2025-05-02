@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createTeamsForDraw } from '@/services/drawService';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+import { getCurrentTenantId } from '@/lib/tenantContext';
+
+// Mock do tenant context
+vi.mock('@/lib/tenantContext', () => ({
+  getCurrentTenantId: vi.fn().mockReturnValue('mock-tenant-id')
+}));
+
+// Definir tenant mock para testes
+const MOCK_TENANT_ID = 'mock-tenant-id';
+
 beforeEach(() => {
   // Limpar todos os mocks antes de cada teste
   vi.clearAllMocks();
@@ -8,7 +18,7 @@ beforeEach(() => {
 
 vi.mock('@/lib/prisma', () => {
   return {
-    default: {
+    prisma: {
       team: {
         findMany: vi.fn(), // Adicione o mock para findMany
         create: vi.fn(),
@@ -31,7 +41,7 @@ describe('createTeamsForDraw', () => {
     (prisma.team.create as any).mockResolvedValueOnce({ id: 1, name: 'Team A' });
     (prisma.team.create as any).mockResolvedValueOnce({ id: 2, name: 'Team B' });
 
-    const result = await createTeamsForDraw({roundId: 1, teams: mockTeams});
+    const result = await createTeamsForDraw({roundId: 1, teams: mockTeams, tenantId: MOCK_TENANT_ID});
 
     expect(result).toHaveLength(2);
     expect(result[0]).toHaveProperty('name', 'Team A');
@@ -49,6 +59,6 @@ describe('createTeamsForDraw', () => {
     // Simular falha na criação de times
     (prisma.team.create as any).mockRejectedValueOnce(new Error('Database error'));
 
-    await expect(createTeamsForDraw({roundId: 1, teams: mockTeams})).rejects.toThrow('Erro ao criar os times.');
+    await expect(createTeamsForDraw({roundId: 1, teams: mockTeams, tenantId: MOCK_TENANT_ID})).rejects.toThrow('Erro ao criar os times.');
   });
 });

@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createGame, finalizeGame, getAllGames, getGameById, updateGame, updateGameById, updateGameScore } from '@/services/gameService';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+import { getCurrentTenantId } from '@/lib/tenantContext';
+
+// Mock do tenant context
+vi.mock('@/lib/tenantContext', () => ({
+  getCurrentTenantId: vi.fn().mockReturnValue('mock-tenant-id')
+}));
+
+// Definir tenant mock para testes
+const MOCK_TENANT_ID = 'mock-tenant-id';
 
 beforeEach(() => {
   // Limpar todos os mocks antes de cada teste
@@ -9,7 +18,7 @@ beforeEach(() => {
 
 vi.mock('@/lib/prisma', () => {
   return {
-    default: {
+    prisma: {
       round: {
         findUnique: vi.fn(),
       },
@@ -26,7 +35,7 @@ vi.mock('@/lib/prisma', () => {
 describe('createGame', () => {
   it('should create a new game if round exists and is not finished', async () => {
     const roundId = 1;
-    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
+    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B', tenantId: MOCK_TENANT_ID };
 
     // Mockando o comportamento da rodada
     (prisma.round.findUnique as any).mockResolvedValue({ finished: false });
@@ -37,6 +46,7 @@ describe('createGame', () => {
       roundId,
       homeTeam: 'Team A',
       awayTeam: 'Team B',
+      tenantId: MOCK_TENANT_ID
     });
 
     const game = await createGame(gameData);
@@ -46,12 +56,13 @@ describe('createGame', () => {
       roundId,
       homeTeam: 'Team A',
       awayTeam: 'Team B',
+      tenantId: MOCK_TENANT_ID
     });
   });
 
   it('should throw an error if the round is finished', async () => {
     const roundId = 1;
-    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
+    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B', tenantId: MOCK_TENANT_ID };
 
     // Mockando o comportamento da rodada
     (prisma.round.findUnique as any).mockResolvedValue({ finished: true });
@@ -61,7 +72,7 @@ describe('createGame', () => {
 
   it('should throw an error if round does not exist', async () => {
     const roundId = 1;
-    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B' };
+    const gameData = { roundId, homeTeam: 'Team A', awayTeam: 'Team B', tenantId: MOCK_TENANT_ID };
 
     // Mockando a rodada não encontrada
     (prisma.round.findUnique as any).mockResolvedValue(null);
@@ -75,8 +86,8 @@ describe('getAllGames', () => {
   it('should return all games', async () => {
     // Mockando o comportamento do Prisma
     (prisma.game.findMany as any).mockResolvedValue([
-      { id: 1, homeTeam: 'Team A', awayTeam: 'Team B' },
-      { id: 2, homeTeam: 'Team C', awayTeam: 'Team D' },
+      { id: 1, homeTeam: 'Team A', awayTeam: 'Team B', tenantId: MOCK_TENANT_ID },
+      { id: 2, homeTeam: 'Team C', awayTeam: 'Team D', tenantId: MOCK_TENANT_ID },
     ]);
 
     const games = await getAllGames();
@@ -90,13 +101,14 @@ describe('getAllGames', () => {
 // Teste para updateGame
 describe('updateGame', () => {
   it('should update a game', async () => {
-    const updatedData = { id: 1, roundId: 2, date: '2025-04-01' };
+    const updatedData = { id: 1, roundId: 2, date: '2025-04-01', tenantId: MOCK_TENANT_ID };
 
     // Mockando o comportamento do Prisma
     (prisma.game.update as any).mockResolvedValue({
       id: 1,
       roundId: 2,
       date: new Date('2025-04-01'),
+      tenantId: MOCK_TENANT_ID
     });
 
     const updatedGame = await updateGame(updatedData);
@@ -105,6 +117,7 @@ describe('updateGame', () => {
       id: 1,
       roundId: 2,
       date: new Date('2025-04-01'),
+      tenantId: MOCK_TENANT_ID
     });
   });
 });
@@ -125,6 +138,7 @@ describe('getGameById', () => {
       awayScore: 0,
       roundId: 1,
       finished: false,
+      tenantId: MOCK_TENANT_ID
     });
 
     const game = await getGameById(gameId);
@@ -139,6 +153,7 @@ describe('getGameById', () => {
       awayScore: 0,
       roundId: 1,
       finished: false,
+      tenantId: MOCK_TENANT_ID
     });
   });
 
@@ -164,6 +179,7 @@ describe('updateGameById', () => {
       id: gameId,
       started: true,
       time: 10,
+      tenantId: MOCK_TENANT_ID
     });
 
     const updatedGame = await updateGameById(gameId, data);
@@ -172,6 +188,7 @@ describe('updateGameById', () => {
       id: gameId,
       started: true,
       time: 10,
+      tenantId: MOCK_TENANT_ID
     });
   });
 
@@ -201,6 +218,7 @@ describe('updateGameScore', () => {
       id: 1,
       homeScore,
       awayScore,
+      tenantId: MOCK_TENANT_ID
     });
 
     const updatedGame = await updateGameScore(gameId, homeScore, awayScore);
@@ -209,6 +227,7 @@ describe('updateGameScore', () => {
       id: 1,
       homeScore,
       awayScore,
+      tenantId: MOCK_TENANT_ID
     });
   });
 
@@ -248,58 +267,66 @@ describe('finalizeGame', () => {
   
   it('should throw error if game not found', async () => {
     (prisma.game.findUnique as any).mockResolvedValue(null);
-  
-    try {
-      await finalizeGame('1');
-    } catch (error: any) {
-      expect(error.message).toBe('Jogo não encontrado');
-    }
+    
+    await expect(finalizeGame('1')).rejects.toThrow('Jogo não encontrado');
   });
   
   it('should throw error if game is already finished', async () => {
-    (prisma.game.findUnique as any).mockResolvedValue({ finished: true, roundId: 1 });
-  
-    try {
-      await finalizeGame('1');
-    } catch (error: any) {
-      expect(error.message).toBe('Este jogo já foi finalizado');
-    }
+    (prisma.game.findUnique as any).mockResolvedValue({ 
+      id: 1, 
+      finished: true,
+      tenantId: MOCK_TENANT_ID
+    });
+    
+    await expect(finalizeGame('1')).rejects.toThrow('Este jogo já foi finalizado');
   });
   
   it('should throw error if round not found', async () => {
-    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
+    (prisma.game.findUnique as any).mockResolvedValue({ 
+      id: 1, 
+      finished: false, 
+      roundId: 999,
+      tenantId: MOCK_TENANT_ID
+    });
     (prisma.round.findUnique as any).mockResolvedValue(null);
-  
-    try {
-      await finalizeGame('1');
-    } catch (error: any) {
-      expect(error.message).toBe('Rodada não encontrada');
-    }
+    
+    await expect(finalizeGame('1')).rejects.toThrow('Rodada não encontrada');
   });
   
   it('should throw error if round is finished', async () => {
-    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
-    (prisma.round.findUnique as any).mockResolvedValue({ finished: true });
-  
-    try {
-      await finalizeGame('1');
-    } catch (error: any) {
-      expect(error.message).toBe('Não é possível finalizar um jogo em uma rodada finalizada');
-    }
+    (prisma.game.findUnique as any).mockResolvedValue({ 
+      id: 1, 
+      finished: false, 
+      roundId: 1,
+      tenantId: MOCK_TENANT_ID
+    });
+    (prisma.round.findUnique as any).mockResolvedValue({ id: 1, finished: true });
+    
+    await expect(finalizeGame('1')).rejects.toThrow('Não é possível finalizar um jogo em uma rodada finalizada');
   });
   
   it('should successfully finalize a game', async () => {
-    (prisma.game.findUnique as any).mockResolvedValue({ finished: false, roundId: 1 });
-    (prisma.round.findUnique as any).mockResolvedValue({ finished: false });
-    (prisma.game.update as any).mockResolvedValue({ roundId: 1 });
-  
+    (prisma.game.findUnique as any).mockResolvedValue({ 
+      id: 1, 
+      finished: false, 
+      roundId: 1,
+      tenantId: MOCK_TENANT_ID
+    });
+    (prisma.round.findUnique as any).mockResolvedValue({ id: 1, finished: false });
+    (prisma.game.update as any).mockResolvedValue({ 
+      id: 1, 
+      finished: true,
+      roundId: 1,
+      tenantId: MOCK_TENANT_ID
+    });
+    
     const result = await finalizeGame('1');
-    expect(result).toEqual({ roundId: 1 });
-    expect(prisma.game.update).toHaveBeenCalledTimes(1);
+    
+    expect(result.finished).toBe(true);
     expect(prisma.game.update).toHaveBeenCalledWith({
       where: { id: 1 },
       data: { finished: true },
-      select: { roundId: true },
+      select: { roundId: true, finished: true }
     });
   });
 });

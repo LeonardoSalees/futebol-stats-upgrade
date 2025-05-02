@@ -7,7 +7,10 @@ export const roundSchema = z.object({
 
   // Relacionamentos: tipicamente não são validados diretamente no input
   games: z.array(z.any()).optional(), // substitua z.any() por gameSchema se quiser validar a estrutura
-  teams: z.array(z.any()).optional()
+  teams: z.array(z.any()).optional(),
+  tenantId: z.string().min(1, {
+    message: "O tenantId é obrigatório",
+  }).optional(),
 })
 
 export type Round = z.infer<typeof roundSchema>

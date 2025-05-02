@@ -19,13 +19,70 @@ export async function POST(request: Request) {
       );
     }
 
-    // Buscar usuário no banco de dados
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Obter o tenantId do cabeçalho (definido pelo middleware)
+    const tenantId = request.headers.get('x-tenant-id');
+    if (!tenantId) {
+      console.error('TenantId não encontrado no cabeçalho');
+      // Tenta buscar o tenant principal como fallback
+      const defaultTenant = await prisma.tenant.findFirst({
+        where: { subdomain: 'principal' }
+      });
+      
+      if (!defaultTenant) {
+        return NextResponse.json(
+          { error: "Tenant não encontrado" },
+          { status: 400 }
+        );
+      }
+      
+      // Buscar usuário no banco de dados com o tenant default
+      const user = await prisma.user.findFirst({
+        where: { 
+          email,
+          tenantId: defaultTenant.id 
+        },
+      });
+
+      // Verificar se o usuário existe e a senha está correta
+      if (!user || user.password !== password) {
+        return NextResponse.json(
+          { error: "Email ou senha inválidos" },
+          { status: 401 }
+        );
+      }
+
+      // Gerar token JWT
+      const token = sign(
+        { 
+          userId: user.id,
+          isAdmin: user.isAdmin,
+          tenantId: user.tenantId 
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return NextResponse.json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          isAdmin: user.isAdmin,
+          tenantId: user.tenantId
+        },
+        token,
+      });
+    }
+
+    // Buscar usuário no banco de dados usando o tenantId
+    const user = await prisma.user.findFirst({
+      where: { 
+        email,
+        tenantId
+      },
     });
 
     // Verificar se o usuário existe e a senha está correta
-    // Em produção, use bcrypt ou outra biblioteca para hash de senha
     if (!user || user.password !== password) {
       return NextResponse.json(
         { error: "Email ou senha inválidos" },
@@ -37,7 +94,8 @@ export async function POST(request: Request) {
     const token = sign(
       { 
         userId: user.id,
-        isAdmin: user.isAdmin 
+        isAdmin: user.isAdmin,
+        tenantId: user.tenantId 
       },
       JWT_SECRET,
       { expiresIn: "7d" }
@@ -50,6 +108,7 @@ export async function POST(request: Request) {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        tenantId: user.tenantId
       },
       token,
     });

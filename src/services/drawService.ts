@@ -1,7 +1,7 @@
-import prisma from "@/lib/prisma";  
+import { prisma } from '@/lib/prisma';  
 import { drawSchema } from "@/schemas/drawSchema";
 
-export async function createTeamsForDraw(data: {roundId: number, teams: { name: string; players: number[] }[]}) {
+export async function createTeamsForDraw(data: {roundId: number, teams: { name: string; players: number[] }[], tenantId: string}) {
   try {
     const parsedData = drawSchema.parse(data);
     const existingTeams = await prisma.team.findMany({
@@ -11,6 +11,10 @@ export async function createTeamsForDraw(data: {roundId: number, teams: { name: 
     if (existingTeams.length > 0) {
       throw new Error('Times já foram sorteados para esta rodada.');
     }
+    if (!data.tenantId) {
+      throw new Error('O tenantId é obrigatório.');
+    }
+          
     const createdTeams = await Promise.all(
       parsedData.teams.map(async (team) => {
         const newTeam = await prisma.team.create({
@@ -22,6 +26,7 @@ export async function createTeamsForDraw(data: {roundId: number, teams: { name: 
                 player: { connect: { id: playerId } },
               })),
             },
+            tenantId: data.tenantId,
           },
         });
 

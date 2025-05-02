@@ -1,7 +1,8 @@
 import { updatePlayer } from '@/services/playerService';
 import { NextResponse } from 'next/server';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: { id: string } }) {
+  const params = await context.params;
   const { id } = params;
   const body = await request.json();
   const { isAvailable, goals, assists, name} = body;

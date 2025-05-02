@@ -14,4 +14,7 @@ export const assistSchema = z.object({
   team: z.string().min(1, {
     message: "O time é obrigatório",
   }),
+  tenantId: z.string().min(1, {
+    message: "O tenantId é obrigatório",
+  }).optional(),
 });

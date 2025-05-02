@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { createAssist, updateAssist, getAllAssists, deleteAssist } from '@/services/assistService';
 
 export async function POST(req: Request) {

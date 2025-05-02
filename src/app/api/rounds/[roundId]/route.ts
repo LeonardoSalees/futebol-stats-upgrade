@@ -3,9 +3,12 @@ import { getRoundById } from '@/services/roundService';
 
 export async function GET(
   request: Request,
-  { params }: { params: { roundId: string } }
+  context: { params: { roundId: string } }
 ) {
+  // Usar await com o objeto params
+  const params = await context.params;
   const { roundId } = params;
+  
   if (!roundId) {
     return new Response(
       JSON.stringify({ error: "ID da rodada inválido" }),

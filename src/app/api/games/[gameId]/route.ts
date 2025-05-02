@@ -3,8 +3,10 @@ import { getGameById, updateGameById } from "@/services/gameService";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { gameId: string } }
+  context: { params: { gameId: string } }
 ) {
+  const params = await context.params;
+  
   if (!params?.gameId) {
     return new Response(JSON.stringify({ error: 'gameId é obrigatório.' }), {
       status: 400,

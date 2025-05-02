@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 
 // Função para calcular ranking de jogadores com base no número de gols e assistências
 export async function getPlayerRanking() {

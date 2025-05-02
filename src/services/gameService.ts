@@ -1,14 +1,15 @@
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { gameSchema } from "@/schemas/gameSchema";
 export const createGame = async (data: {
   roundId: number;
   date?: string;
   homeTeam: string;
   awayTeam: string;
+  tenantId: string;
 }) => {
   try {
     const parsedData = gameSchema.parse(data);
-    const { roundId, homeTeam, awayTeam } = parsedData;
+    const { roundId, homeTeam, awayTeam, tenantId } = parsedData;
 
   // Verificar se a rodada existe
   const round = await prisma.round.findUnique({
@@ -23,12 +24,15 @@ export const createGame = async (data: {
   if (round.finished) {
     throw new Error('Não é possível criar um jogo para uma rodada finalizada.');
   }
-
+  if (!tenantId) {
+    throw new Error('O tenantId é obrigatório.');
+  }
   const game = await prisma.game.create({
     data: {
       roundId,
       homeTeam,
       awayTeam,
+      tenantId
     },
   });
 
@@ -194,6 +198,7 @@ export const finalizeGame = async (gameId: string) => {
     },
     select: {
       roundId: true,
+      finished: true,
     },
   });
 

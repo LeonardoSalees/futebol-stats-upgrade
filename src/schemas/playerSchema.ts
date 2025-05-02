@@ -7,6 +7,9 @@ export const playerSchema = z.object({
     .max(100, { message: "Nome muito longo" }),
   isAvailable: z.boolean().default(false),
   team: z.string().nullable(),
+  tenantId: z.string().min(1, {
+    message: "O tenantId é obrigatório",
+  }).optional(),
   goals: z.array(z.object({
     playerId: z.number(),
     gameId: z.number(),
